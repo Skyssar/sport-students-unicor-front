@@ -1,0 +1,74 @@
+:root {
+  font-family: "Roboto", Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media (max-width: 900px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+body, * {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+p {
+  margin: 0;
+}
+
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-container .login-form {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  background-color: #fffefe;
+  border-radius: 8px;
+  margin: 20px;
+  width: 400px;
+  overflow: hidden;
+}
+.login-container .login-form .form-header {
+  padding: 20px 25px 10px;
+  text-align: center;
+  color: gray;
+}
+.login-container .login-form .form-header .form-logo {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+.login-container .login-form .form-header .form-logo img {
+  width: 50%;
+  min-width: 150px;
+}
+.login-container .login-form .form-header .form-title {
+  display: block;
+}
+.login-container .login-form .form-content {
+  padding: 15px 30px 30px;
+}
+.login-container .login-form .form-buttons {
+  margin-top: 20px;
+}
+
+.sgc-button.MuiButton-contained {
+  background-color: #2e7d32;
+  text-transform: none;
+}
+.sgc-button.MuiButton-contained:hover {
+  background-color: #1b5e20;
+}
+
+/*# sourceMappingURL=index.css.map */
