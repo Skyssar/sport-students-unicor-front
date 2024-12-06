@@ -5,7 +5,9 @@ import { DateField } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import dayjs from "dayjs";
 
 const inputs = [
    {
@@ -14,22 +16,22 @@ const inputs = [
       type: "text",
    },
    {
-      name: "lastname",
+      name: "lastName",
       label: "Apellidos",
    },
    {
-      name: "type-id",
+      name: "typeId",
       label: "Tipo de identificación",
       select: true,
       options: [
          { id: "CC", label: "Cédula de ciudadanía" },
          { id: "TI", label: "Tarjeta de identidad" },
          { id: "CE", label: "Cédula de extranjería" },
-         { id: "PASS", label: "Pasaporte" },
+         { id: "PS", label: "Pasaporte" },
       ]
    },
    {
-      name: "id",
+      name: "id_number",
       label: "Número de identificación",
       type: "number",
    },
@@ -65,16 +67,17 @@ const inputs = [
       name: "address",
       label: "Dirección",
    },
-   {
-      name: "mail",
-      label: "Correo electrónico",
-      type: "email"
-   },
-   {
-      name: "phone",
-      label: "Celular",
-      type: "tel"
-   },
+   // {
+   //    name: "email",
+   //    label: "Correo electrónico",
+   //    type: "email",
+   //    disabled: true,
+   // },
+   // {
+   //    name: "phone",
+   //    label: "Celular",
+   //    type: "tel"
+   // },
 ]
 
 const valuesFromArray = ( object=null ) => {
@@ -90,9 +93,22 @@ function Form() {
       mode: "onChange",
    });
 
-   const onSubmit = handleSubmit(data => {
-      console.log(data);
-      navigate( "/sport-info" )
+   const [ dateError, setDateError ] = useState(null);
+   const dateRef = useRef();
+
+   const onSubmit = handleSubmit(async (info) => {
+      let userFromStorage = localStorage.getItem("user");
+      info["birthday"] = dayjs(dateRef.current?.value).format('YYYY-MM-DD');
+      delete info.email;
+      info["user"] = JSON.parse( userFromStorage ).id;
+      try {
+         const { data } = await axios.post('http://localhost:8000/api/profile-info/', info)
+         if (data){
+            navigate("/sport-info");
+         }
+      } catch (e){
+         console.log(e);
+      }
    })
 
    useEffect( () => {
@@ -134,7 +150,7 @@ function Form() {
                                           ...input.select && {
                                              children: input.options?.map(
                                                 (option) => (
-                                                   <MenuItem key={option.id} value={option.label}>
+                                                   <MenuItem key={option.id} value={option.id}>
                                                    {option.label}
                                                    </MenuItem>
                                                 )
@@ -147,7 +163,7 @@ function Form() {
                               />
                               ) : (
                               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                 <DateField fullWidth required  format="DD/MM/YYYY" label={ input.label } />
+                                 <DateField inputRef={dateRef} fullWidth required onError={(e) => setDateError(e)} format="DD/MM/YYYY" label={ input.label } />
                               </LocalizationProvider>
                               )
                            }
@@ -157,7 +173,7 @@ function Form() {
                   }
                </Grid>
                <Box display="flex" mt={4} gap={1} justifyContent="flex-end">
-                  <Button type="submit" disabled={ !formState.isValid } variant="contained" color="primary">
+                  <Button type="submit" disabled={ !formState.isValid || dateError != null } variant="contained" color="primary">
                      Siguiente
                   </Button>
                </Box>

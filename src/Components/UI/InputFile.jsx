@@ -16,7 +16,7 @@ const VisuallyHiddenInput = styled('input')({
    width: 1,
 });
 
-export default function InputFile() {
+export default function InputFile({ name, required=false }) {
 
    const fileName = React.useRef();
 
@@ -40,6 +40,8 @@ export default function InputFile() {
          >
             Subir archivo
             <VisuallyHiddenInput
+               required={required}
+               name={name}
                type="file"
                accept="application/pdf"
                onChange={handleUpload}

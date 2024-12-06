@@ -5,61 +5,48 @@ import { Link, useNavigate } from "react-router-dom";
 // import useAuth from "src/hooks/useAuth";
 import Logo from "src/assets/img/unicor_acreditada.png"
 import Bg from "src/assets/img/OIG2.jpg"
-import axios from "axios";
-import { useState } from "react";
 
-function Login() {
+function Admin() {
 
    const { control, handleSubmit } = useForm({
       defaultValues: {
-         email: '',
+         username: '',
          password: '',
       }
    });
 
-   const [ error, setError ] = useState(false);
-
    const navigate = useNavigate();
 
-   const onSubmit = handleSubmit( async (userData) => {
-      try {
-         const { data } = await axios.post('http://localhost:8000/api/login', userData)
-         if (data){
-            setError(false);
-            window.localStorage.setItem( "user", JSON.stringify( data.user ) )
-            navigate("/form");
-         }
-      } catch (e){
-         console.log(e);
-         setError(true);
-      }
-       
+   // const { loginUser, loginGoogleUser, error } = useAuth();
+
+   const onSubmit = handleSubmit( data => {
+      navigate("/admin/dashboard")
    });
 
    return (
-      <div className="login-container" style={{ backgroundImage: `url(${ Bg })`, backgroundSize: "cover", backgroundPosition: "center" }}>
+      <div className="login-container" style={{ backgroundColor: "gray", backgroundSize: "cover", backgroundPosition: "center" }}>
          <form className="login-form" onSubmit={ onSubmit }>
             <div className="form-header">
                <div className="form-logo">
                   <img src={Logo} alt="SGC Logo" />
                </div>
-               <h2>Sport Students Unicor</h2>
+               <h2>Admin Sports Students</h2>
             </div>
             <div className="form-content">
-               {
+               {/* {
                   error && (
                      <Alert severity="error"> 
                         Credenciales inválidas
                      </Alert>
                   )
-               }
+               } */}
                <Controller 
-                  name="email"
+                  name="username"
                   rules={{ required: true }}
                   control={control}
                   render={({ field }) => (
                      <TextField 
-                        label="Correo" type="email"
+                        label="Usuario"
                         fullWidth size="small" margin="normal"
                         required
                         {...field}
@@ -86,11 +73,11 @@ function Login() {
                   </Button>
                </div>
                <Box textAlign="center" mt={3}>
-                  <p style={{ fontSize: 14 }}>¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link></p>
+                  <p style={{ fontSize: 14 }}>Esta vista es sólo para administradores. Si quieres iniciar sesión con tu cuenta, haz click <Link to="/login">aquí</Link>.</p>
                </Box>
             </div>
          </form>
       </div>
    )
 }
-export default Login
+export default Admin

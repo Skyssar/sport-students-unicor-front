@@ -1,0 +1,143 @@
+.admin-container
+   display: grid
+   grid-template-areas: "navbar content"
+   grid-template-columns: auto 1fr
+   height: 100vh
+   overflow-x: hidden
+
+.content
+   grid-area: content
+   overflow-x: hidden
+   color: black
+   .content-topbar
+      height: 60px
+      display: flex
+      padding: 0 20px
+      justify-content: space-between
+      align-items: center
+      border-bottom: 2px solid gray
+
+   // content
+   .content-container
+      padding: 20px 25px
+      margin: 0 auto
+      max-width: 1500px
+      .content-paper
+         border-radius: 5px
+         background-color: white
+         padding: 0
+      .content-header
+         display: flex
+         gap: 12px
+         line-height: normal
+      .content-title
+         display: flex
+         justify-content: space-between
+         flex-wrap: wrap
+         padding: 10px 15px
+         gap: 8px
+      .content-main
+         padding: 16px 12px
+         display: grid
+         gap: 16px
+      @media (max-width: 900px)
+         padding: 25px
+         .content-header
+            gap: 5px
+            .arrow-back-icon
+               // font-size: 1.8rem
+         .content-main
+            padding: 16px 8px
+      @media (max-width: 500px)
+         padding: 1rem
+
+   .paper-container
+      padding: 24px 16px
+      .paper-summary
+         margin: 12px 0
+         .title
+            margin-left: 8px
+      .paper-details
+         padding: 8px 16px 16px
+         @media (max-width: 900px)
+            padding: 2px 8px
+
+   // expansible panel MUI
+   .expansible-panel
+      .expansible-summary
+         .MuiAccordionSummary-content.Mui-expanded
+            margin: 12px 0
+         .title
+            margin-left: 8px
+      .sections-content
+         display: flex
+         flex-direction: column
+         margin: 2px 16px
+         gap: 16px
+         @media (max-width: 900px)
+            margin: 2px 8px
+
+
+   // form
+   .regular-form
+      .form-content
+         padding: 16px 12px
+      .form-buttons
+         display: flex
+         margin-top: 24px
+
+   // title form
+   .title-form
+      display: flex
+      .title-input
+         font-family: inherit
+         font-size: 2em
+         font-weight: bold 
+         padding: 4.4px 8px
+         border-style: none
+         width: 100%
+      .title-form-buttons
+         display: flex
+         @media (max-width: 600px)
+            width: 40px
+            flex-wrap: wrap
+
+   // table
+   .table-container
+      width: 100%
+      min-width: 100px
+      margin: 10px auto
+      min-height: 300px
+
+// navigation bar
+.navbar
+   grid-area: navbar
+   -webkit-box-shadow: 1px 0px 8px gray
+   -moz-box-shadow: 1px 0px 8px gray
+   box-shadow: 1px 0px 8px gray
+   .admin-sidebar // NAVBAR COMPONENT
+      font-size: 14px
+      border: none
+      @media(max-width: 600px)
+         width: 100vw
+      nav.sidebar-menu
+         .sidebar-header
+            height: 60px
+            border-bottom: 2px solid gray
+            .ps-menu-button
+               height: 100%
+         .ps-menu-button
+            height: 40px
+            &.active
+               background-color: gray
+               color: black
+            //    &:hover
+            //       background-color: lightgray
+            // .ps-submenu-content
+            //    background-color: #3d3d3d
+      // when collapsed
+      &.ps-collapsed 
+         nav.sidebar-menu
+            .ps-menu-button
+               padding: 0px 15px
+               transition: padding .3s ease

@@ -1,7 +1,9 @@
-import { TextField, Autocomplete, Grid2 as Grid, Paper, Button, Chip, Stack, createFilterOptions, FormControl, FormControlLabel, RadioGroup, Radio, MenuItem, CssBaseline } from "@mui/material";
+import { TextField, Autocomplete, Grid2 as Grid, Paper, Button, Chip, Stack, createFilterOptions, FormControl, FormControlLabel, RadioGroup, Radio, MenuItem, CssBaseline, Box, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Navbar from "./Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputFile from "./UI/InputFile";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const deportes = [
    "fútbol", "baloncesto", "tenis", "natación", "atletismo", "béisbol", "rugby",
@@ -31,9 +33,13 @@ const filter = createFilterOptions();
 
 function SportHistory() {
 
+   const [ openDialog, setOpenDialog ] = useState(false);
+   const [ sports, setSports ] = useState([]);
    const [selectedSports, setSelectedSports] = useState([]);
    const [selectValue, setSelectValue] = useState(null);
    const [years, setYears] = useState(0);
+
+   const navigate = useNavigate();
 
    const [options, setOptions] = useState({
       intercolegiados: 0,
@@ -44,8 +50,33 @@ function SportHistory() {
    const handleSubmitSport = (e) => {
       e.preventDefault();
       console.log(selectValue)
-      setSelectedSports(prev => [...prev, { sport: selectValue.title, years: years }]);
+      setSelectedSports(prev => [...prev, { name: selectValue.name, sport: selectValue.id, years: years }]);
       setSelectValue(null);
+   }
+
+   const handleSubmitInfo = async (e) => {
+      e.preventDefault();
+      let userFromStorage = JSON.parse( localStorage.getItem("user") );
+      const formData = new FormData(e.currentTarget);
+      console.log(Object.fromEntries(formData))
+      formData.set("user", userFromStorage);
+      const sportsList = selectedSports.map( e => ({ ...e, user: userFromStorage }) );
+      console.log(sportsList)
+      // formData.set(("merito_file", document.getElementById("fileInput").files[0]))
+      try {
+         const [ responseOne, responseTwo ] = await Promise.all([
+            axios.post('http://localhost:8000/api/sport-info/', formData),
+            axios.post('http://localhost:8000/api/sports-history/', sportsList),
+         ])
+         if (responseOne && responseTwo){
+            console.log(responseTwo);
+            console.log(responseOne);
+            setOpenDialog(true);
+         }
+      } catch (e){
+         console.log(e);
+         // e.response.data && setError( Object.values(e.response.data)[0] );
+      }
    }
 
    const deleteSelectedSport = (index) => {
@@ -56,8 +87,36 @@ function SportHistory() {
       })
    }
 
+   const getSports = async () => {
+      try {
+         const { data } = await axios.get('http://localhost:8000/api/sports')
+         if (data){
+            setSports(data)
+         }
+      } catch (e){
+         console.log(e);
+      }
+   }
+
+   useEffect(()=>{
+      getSports();
+   }, [])
+
    return (
       <Navbar>
+         <Dialog
+            sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
+            maxWidth="xs"
+            open={openDialog}
+         >
+            <DialogTitle>Confirmación</DialogTitle>
+            <DialogContent>
+               <h2>Datos guardados.</h2>
+            </DialogContent>
+            <DialogActions>
+               <Button onClick={() => { setOpenDialog(false); navigate("/form") }}>Aceptar</Button>
+            </DialogActions>
+         </Dialog>
          <Paper sx={{ p: 4 }}>
             <h2 style={{ marginBottom: 12 }}>Historia Deportiva</h2>
             <Grid component="form" onSubmit={handleSubmitSport} container spacing={3} mb={3}>
@@ -69,50 +128,52 @@ function SportHistory() {
                      fullWidth
                      freeSolo
                      clearOnBlur
-                     options={deportes}
+                     options={sports}
                      value={selectValue}
-                     onChange={(event, newValue) => {
-                        console.log(newValue)
-                        if (typeof newValue === 'string') {
-                           setSelectValue({
-                              title: newValue,
-                           });
-                        } else if (newValue && newValue.inputValue) {
-                           // Create a new value from the user input
-                           setSelectValue({
-                              title: newValue.inputValue,
-                           });
-                        } else {
-                           setSelectValue(newValue);
-                        }
-                     }}
-                     filterOptions={(options, params) => {
-                        const filtered = filter(options, params);
+                     // onChange={(event, newValue) => {
+                     //    console.log(newValue)
+                     //    if (typeof newValue === 'string') {
+                     //       setSelectValue({
+                     //          title: newValue,
+                     //       });
+                     //    } else if (newValue && newValue.inputValue) {
+                     //       // Create a new value from the user input
+                     //       setSelectValue({
+                     //          title: newValue.inputValue,
+                     //       });
+                     //    } else {
+                     //       setSelectValue(newValue);
+                     //    }
+                     // }}
+                     // filterOptions={(options, params) => {
+                     //    const filtered = filter(options, params);
 
-                        const { inputValue } = params;
-                        // Suggest the creation of a new value
-                        const isExisting = options.some((option) => inputValue === option.title);
-                        if (inputValue !== '' && !isExisting) {
-                           filtered.push({
-                              inputValue,
-                              title: `Add "${inputValue}"`,
-                           });
-                        }
+                     //    const { inputValue } = params;
+                     //    // Suggest the creation of a new value
+                     //    const isExisting = options.some((option) => inputValue === option.title);
+                     //    if (inputValue !== '' && !isExisting) {
+                     //       filtered.push({
+                     //          inputValue,
+                     //          title: `Add "${inputValue}"`,
+                     //       });
+                     //    }
 
-                        return filtered;
-                     }}
-                     getOptionLabel={(option) => {
-                        // Value selected with enter, right from the input
-                        if (typeof option === 'string') {
-                           return capitalize(option);
-                        }
-                        // Add "xxx" option created dynamically
-                        if (option.inputValue) {
-                           return option.inputValue;
-                        }
-                        // Regular option
-                        return capitalize(option.title);
-                     }}
+                     //    return filtered;
+                     // }}
+                     // getOptionLabel={(option) => {
+                     //    // Value selected with enter, right from the input
+                     //    if (typeof option === 'string') {
+                     //       return capitalize(option);
+                     //    }
+                     //    // Add "xxx" option created dynamically
+                     //    if (option.inputValue) {
+                     //       return option.inputValue;
+                     //    }
+                     //    // Regular option
+                     //    return capitalize(option.title);
+                     // }}
+                     getOptionLabel={(option) => option.name}
+                     onChange={(event, newValue) => setSelectValue(newValue)}
                      renderInput={(params) => (
                         <TextField
                            {...params}
@@ -144,7 +205,8 @@ function SportHistory() {
                         selectedSports.length > 0 && (
                            selectedSports.map((v, i) => (
                               <Chip
-                                 label={`${capitalize(v.sport)} (${v.years} años)`}
+                                 key={"sport"+i}
+                                 label={`${capitalize(v.name)} (${v.years} años)`}
                                  onDelete={() => deleteSelectedSport(i)}
                               />
                            ))
@@ -154,7 +216,7 @@ function SportHistory() {
                </Grid>
             </Grid>
 
-            <Grid container spacing={4}>
+            <Grid container spacing={4} component="form" onSubmit={handleSubmitInfo}>
                <Grid container size={{ xs: 12, md: 6 }} spacing={2}>
                   <Grid size={{ xs: 12 }}>
                      <h3>¿Ha participado en juegos intercolegiados?</h3>
@@ -162,6 +224,7 @@ function SportHistory() {
                   <Grid display="flex" alignItems="center">
                      <FormControl>
                         <RadioGroup
+                           name="intercolegiados"
                            sx={{ display: "flex", flexDirection: "row" }}
                            value={options.intercolegiados}
                            onChange={(e, value) => {
@@ -176,7 +239,7 @@ function SportHistory() {
                   {
                      options.intercolegiados != 0 && (
                         <Grid size={{ xs: "grow" }}>
-                           <TextField select fullWidth size="medium" label="Fase alcanzada">
+                           <TextField name="inter_fase" select fullWidth size="medium" label="Fase alcanzada">
                               {
                                  intercolegiadosOptions.map((option, i) => (
                                     <MenuItem key={`${option}-${i}`} value={option}>
@@ -198,6 +261,7 @@ function SportHistory() {
                   <Grid display="flex" alignItems="center">
                      <FormControl>
                         <RadioGroup
+                           name="associated"
                            sx={{ display: "flex", flexDirection: "row" }}
                            value={options.campeonatos}
                            onChange={(e, value) => {
@@ -212,7 +276,7 @@ function SportHistory() {
                   {
                      options.campeonatos != 0 && (
                         <Grid size={{ xs: "grow" }}>
-                           <TextField select fullWidth size="medium" label="Nivel alcanzado">
+                           <TextField name="assoc_fase" select fullWidth size="medium" label="Nivel alcanzado">
                               {
                                  asociadoOptions.map((option, i) => (
                                     <MenuItem key={`${option}-${i}`} value={option}>
@@ -230,7 +294,7 @@ function SportHistory() {
                <Grid size={{ xs: 12 }}>
                   <h3>Reconocimientos al mérito deportivo</h3>
                   <p><small>Cargar en un sólo archivo PDF.</small></p>
-                  <InputFile />
+                  <InputFile name="merito_file" />
                </Grid>
 
                <hr style={{ width: "100%" }} />
@@ -238,16 +302,22 @@ function SportHistory() {
                <Grid size={{ xs: 12, md: 6 }}>
                   <h3>Anamnesis Deportiva</h3>
                   <p><small>Original del certificado médico de aptitud para el ejercicio físico en PDF.</small></p>
-                  <InputFile />
+                  <InputFile required name="anamnesis_file" />
                </Grid>
 
                <Grid size={{ xs: 12, md: 6 }}>
                   <h3>Consentimiento informado</h3>
                   <p><small>Original, firmado por el participante o representante legal (en caso de ser menor de edad).</small></p>
-                  <InputFile />
+                  <InputFile required name="ci_file" />
                </Grid>
 
+               <Box display="flex" mt={4} gap={1} justifyContent="flex-end">
+                  <Button type="submit" disabled={ selectedSports.length == 0 } variant="contained" color="primary">
+                     Guardar
+                  </Button>
+               </Box>
             </Grid>
+
 
          </Paper>
 
